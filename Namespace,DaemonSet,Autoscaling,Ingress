@@ -1,0 +1,118 @@
+------------------NameSpace----------------------------
+Namespaces in Kubernetes are logical isolation units that help organize and manage resources within a cluster.
+
+Create a namespace: you can create it by two methods :--------------------------- 1 > direct  2 > by YAML file 
+$  kubectl create namespace my-namespace  // direct creation
+
+#  vi namespace.yml
+$ 
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: my-namespace
+  labels:
+    environment: dev
+ESC +wq +enter
+
+# kubectl apply -f namespace.yml
+
+#kubectl get namespaces  // to view namespace
+# kubectl delete namespace <namespace-name> //to delete any ns
+
+-------------------: Deployment file to deploy pods in namespace :------------------
+
+# vi deployment.yml
+$
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+  namespace: my-namespace  # Specify the namespace here
+  labels:
+    app: my-app
+spec:
+  replicas: 3  # Number of pod replicas
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-container
+        image: nginx:latest  # Container image
+        ports:
+        - containerPort: 80  # Exposed container port
+
+# kubectl apply -f deployment.yml
+# kubectl get deployments -n my-namespace
+# kubectl get pods -n my-namespace
+---------This approach organizes your Deployment within the desired namespace for better resource management. ---------
+
+
+
+
+------:: DaemonSet in Kubernete  : ---------
+
+""A DaemonSet in Kubernetes ensures that a copy of a specific Pod runs on all (or a subset of) nodes in the cluster.""
+" It is commonly used for running background processes or system-level services that need to exist on all (or some) nodes to perform tasks such as monitoring, logging, or managing node-specific configurations. "
+
+# vi DaemonSet.yml
+$
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: my-daemonset
+  namespace: my-namespace  # Specify namespace, or omit for default
+  labels:
+    app: my-daemon-app
+spec:
+  selector:
+    matchLabels:
+      app: my-daemon-app
+  template:
+    metadata:
+      labels:
+        app: my-daemon-app
+    spec:
+      containers:
+      - name: daemon-container
+        image: nginx:latest  # Replace with the desired image
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+
+# kubectl apply -f daemonset.yaml
+# kubectl get daemonset -n my-namespace
+
+------------- DaemonSet Vs Deployment ----------------------
+-----daemonset runs on each of the workernode and creates same number of pods as workernode  but  deployement creates only on a single worker node or we can say that it is not defined on which workernode it will create pod , it only considered the availabily of resources(scheduler checks it) it will create number of repicas that u wants.  ---------------
+
+
+
+--> cluster autoscaling: in this worker nodes increases
+
+--> VPA (Vertical pod autoscaler): it increases the resources of the pods like increase cpu or memory 
+--> HPA (horizontal pod autoscaler):  it increases the number of pods of the service
+
+
+
+
+-------------INGRESS--------------
+In Kubernetes, an Ingress is an API object that manages external access
+to the services in a cluster, typically HTTP and HTTPS.
+Exposing multiple services under a single IP address,
+SSL/TLS termination, name-based virtual hosting, and more.
+Ingress also allows for
+load balancing and can be configured to work with different load balancing
+algorithms.
+it maps the domain name with the kubernetes and make it accessible from outside.
+
