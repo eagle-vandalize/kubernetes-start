@@ -115,4 +115,74 @@ Ingress also allows for
 load balancing and can be configured to work with different load balancing
 algorithms.
 it maps the domain name with the kubernetes and make it accessible from outside.
+An Ingress is an API object in Kubernetes that manages external access to services within a cluster, typically HTTP or HTTPS.
+
+
+# You can install the NGINX Ingress Controller using Helm:
+$ helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+$ helm install nginx-ingress ingress-nginx/ingress-nginx
+
+#Deploy a sample application with a service:
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-app
+  labels:
+    app: example
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: example
+  template:
+    metadata:
+      labels:
+        app: example
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: example-service
+spec:
+  selector:
+    app: example
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: ClusterIP
+
+#Define an Ingress object to route traffic to the service:
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: example-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: example.com              # Hostname
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: example-service  # Target service
+            port:
+              number: 80
+
+You can check the Ingress Controller's external IP with:-------
+# kubectl get svc -n ingress-nginx
+
+Access the application using example.com in your browser or curl:----------
+# curl http://example.com
+
+
 
