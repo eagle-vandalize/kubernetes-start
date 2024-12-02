@@ -185,4 +185,37 @@ Access the application using example.com in your browser or curl:----------
 # curl http://example.com
 
 
+-------------Statefulset--------------------
+it is mainly used to secure the db , if any failure or update perform onn any field or application then the stored data will not be deleted , it remains the same as before , 
+ex: if a student leaves a class with the roll no 2 then when he came back then he will reassign the roll no 2 as before .
+
+In replicaset the data is stored on that pod so when it deleted then the data is also deleted so it is known as stateless
+but with the use of pv/pvc we makes our data persistent (statefulset).
+
+--statefulset----
+
+make ec2 with min of medium size
+connect it
+# sudo apt update
+# sudo  apt install docker.io -y
+# sudo usermod -aG docker $USER && newgrp docker 
+
+ 1  vi kind.sh
+    2  chmod +x kind.sh
+    3  ./kind.sh
+    4  vi kubectl.sh
+    5  chmod +x kubectl.sh
+    6  ./kubectl.sh
+    7  kind create cluster --name statefulset-demo
+    8  kubectl get nodes
+    9  vi statefulset.yaml
+   10  kubectl apply -f statefulset.yaml
+   11  kubectl get pods -l app=nginx
+   12  kubectl get pvc
+   13  kubectl get svc web
+   14  kubectl port-forward web-0 8080:80
+   15  curl http://localhost:8080
+   16  kubectl port-forward web-0 8080:80 &
+   17  curl http://localhost:8080
+   18  history
 
