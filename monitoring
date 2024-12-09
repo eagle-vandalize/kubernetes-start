@@ -1,0 +1,14 @@
+prometheus:
+        It collects and stores information (called metrics) like:
+        CPU usage of a server.
+        Number of HTTP requests received by a website.
+        Memory usage of an application.
+        Alerting:
+            If CPU usage crosses a threshold, Prometheus sends an alert (via email, Slack, etc.).
+Grafana : 
+        Think of Grafana as a dashboard for displaying data visually.
+        It creates graphs, charts, and dashboards for easy visualization.
+        You can look at a real-time dashboard showing:
+            CPU usage.
+            Website traffic.
+            Application performance.
