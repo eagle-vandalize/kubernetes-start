@@ -1,0 +1,76 @@
+In Kubernetes, **liveness** and **readiness probes** are mechanisms used to monitor the health of application containers running inside Pods. They are defined in deployment YAML files to help the Kubernetes control plane manage container lifecycle more reliably.
+
+---
+
+## 🔍 Liveness Probe
+
+### **Purpose**:
+
+The **liveness probe** checks whether the application is *alive* and functioning. If the liveness probe fails repeatedly, Kubernetes assumes the container is stuck and restarts it automatically.
+
+### **Common Use Case**:
+
+Detects situations like deadlocks, infinite loops, or failed threads where the application is not responding anymore, but the process is still running.
+
+### **Example**:
+
+```yaml
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: 8080
+  initialDelaySeconds: 15
+  periodSeconds: 20
+  failureThreshold: 3
+```
+
+### **Key Fields**:
+
+* `httpGet`: Performs an HTTP GET request.
+* `initialDelaySeconds`: Wait time before the first probe.
+* `periodSeconds`: Frequency of checks.
+* `failureThreshold`: Number of failures before restarting.
+
+---
+
+## 🚦 Readiness Probe
+
+### **Purpose**:
+
+The **readiness probe** checks whether the application is *ready* to handle traffic. If it fails, the Pod is **removed from Service endpoints**, meaning it won’t receive any traffic.
+
+### **Common Use Case**:
+
+Used when the application needs time after startup or restart to initialize (e.g., loading configs, establishing DB connections).
+
+### **Example**:
+
+```yaml
+readinessProbe:
+  httpGet:
+    path: /ready
+    port: 8080
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  failureThreshold: 3
+```
+
+### **Key Fields**:
+
+* Similar to liveness probe.
+* If this probe fails, the Pod stays running but does not receive traffic.
+
+---
+
+## 📌 Summary Comparison
+
+| Feature           | Liveness Probe                | Readiness Probe                        |
+| ----------------- | ----------------------------- | -------------------------------------- |
+| Purpose           | Detects if app is *alive*     | Detects if app is *ready to serve*     |
+| Action on Failure | Pod is restarted              | Pod is removed from Service endpoints  |
+| Impact            | Restarts unhealthy containers | Avoids sending traffic to unready Pods |
+| Typical Use       | Detect deadlocks or hangs     | Delay traffic until warm-up completes  |
+
+---
+
+Would you like examples for TCP or command-based probes as well?
