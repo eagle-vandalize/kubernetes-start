@@ -1,0 +1,147 @@
+steps to connect with a port to docker image:
+
+-> make a ec2 instance with assigning a security group 80 port access from anywhere
+-> connect with ssh 
+-> clone the repo
+-> docker login
+-> docker run with giving port address 
+ docker run -p 80:80  name-any name-of-container
+(docker run  -p 80:80 --name my-nginx nginx)  or  ( docker run -it -p 80:80 --name my-nginx nginx)
+  
+
+
+
+-----------------:Kubernetes :----------------------------
+ 1. ec2 with high memory space like medium size
+ 2. give it ssh,http,https access
+ 3. connect it with ssh command
+ 4. - Update repo
+	# sudo apt-get update
+- Install docker 
+	# sudo apt-get install docker.io -y
+-  add your user to the Docker group
+	# sudo usermod -aG docker $USER && newgrp docker 
+
+5. kind: Kubernetes in DOcker (_ lightweight tool for running Kubernetes clusters in Docker containers._) 
+vi kind.sh
+
+#!/bin/bash
+# For AMD64 / x86_64
+[ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.20.0/kind-linux-amd64
+chmod +x ./kind
+sudo cp ./kind /usr/local/bin/kind
+rm -rf kind
+
+
+
+ # chmod +x kind.sh
+
+ # ./kind.sh
+
+6. vi config.yml
+
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+- role: control-plane
+  image: kindest/node:v1.30.0
+- role: worker
+  image: kindest/node:v1.30.0
+- role: worker
+  image: kindest/node:v1.30.0
+
+
+- Using this command create kind cluster
+	# kind create cluster --config=config.yml
+- Check nodes
+	# kubectl get nodes
+
+
+7. vi kubectl.sh
+
+#!/bin/bash
+# Variables
+VERSION="v1.30.0"
+URL="https://dl.k8s.io/release/${VERSION}/bin/linux/amd64/kubectl"
+INSTALL_DIR="/usr/local/bin"
+# Download and install kubectl
+curl -LO "$URL"
+chmod +x kubectl
+sudo mv kubectl $INSTALL_DIR/
+kubectl version --client
+# Clean up
+rm -f kubectl
+echo "kubectl installation complete."
+
+
+
+# chmod +x kubectl.sh
+
+# ./kubectl.sh
+
+
+
+8. Check Docker containers running:
+
+docker ps
+List all Kubernetes pods in all namespaces:
+
+kubectl get pods -A
+
+
+
+9. create a namespace:
+  two ways:
+		1st:
+			kubectl create namespace my-namespace
+		2nd: by YAML file
+		 * vi namespace.yml
+	          apiVersion: v1
+		kind: Pod
+		metadata:
+  			name: my-pod
+  			namespace: my-namespace
+		spec:
+  			containers:
+  				- name: nginx
+    				image: nginx:latest
+    				ports:
+    				- containerPort: 80
+                   
+		*  kubectl apply -f pod-in-namespace.yaml
+
+
+10. deployment using a namespace
+
+vi deployment.yml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+  namespace: my-ns  # Specify the namespace here
+  labels:
+    app: my-app
+spec:
+  replicas: 3  # Number of pod replicas
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-container
+        image: nginx:latest  # Container image
+        ports:
+        - containerPort: 80  # Exposed container port
+
+
+kubectl apply -f  deployment.yml
+kubectl get deployments -n my-namespace
+kubectl get pods -n my-namespace
+
+
+
