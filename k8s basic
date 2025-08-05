@@ -1,0 +1,55 @@
+-----------------------------Kubernetes  link: (https://saimanasak.medium.com/understanding-kubernetes-architecture-add159d720fd)
+1.control plane(Master node) :
+	- API server
+	- kube scheduler	
+	- controller manager
+	- etcd (key-value stored)
+
+2. Data plane(worker node):
+	- kubelet
+	- kube proxy
+	- CONTAINER runtime
+.............................
+Control Plane:
+It is the brain of the Kubernetes cluster.
+The control plane maintains the desired state of the cluster i.e., it continuously compares the current state of the cluster (e.g., the number of pods running) with the desired state (as defined by the user).
+
+Components of the Control Plane
+1. etcd:
+- etcd is a reliable distributed key-value store that is simple, secure, and fast.
+- it stores:----
+	Cluster Configuration and Metadata: Nodes, Namespaces, Resource Quotas, Cluster Roles and Role Bindings (RBAC)
+	Workloads: Pods, Deployments, ReplicaSets, DaemonSets, StatefulSets, Jobs, and CronJobs.
+	Services and Networking: Services, Endpoints, Ingress, Network Policies, and ConfigMaps.
+	Secrets and Credentials: Secrets and Service Accounts Tokens.
+	Persistent Storage: Persistent Volumes (PVs), Persistent Volume Claims (PVCs), and Storage Classes.
+	Schedulers and Controllers: Controllers, Events, Scheduler Info.
+	Custom Resource Definitions (CRDs)
+	Admission Controllers: Admission Webhooks
+	Autoscaling Data: Horizontal Pod Autoscalers (HPA)
+	API Server Configuration: API Server Discovery Info
+	Federated Resources
+2. kube-api server:
+	It is a central component of the Kubernetes control plane, responsible for managing communication within the cluster.
+	It exposes a RESTful API that allows users and components to perform operations on Kubernetes resources like pods, services, and deployments.
+3. kube-controller-manager:
+	It is a core component of Kubernetes responsible for managing controllers that regulate the state of the cluster
+	Continuously monitors the cluster state via the API server and makes decisions to bring the cluster closer to the desired state as defined in the Kubernetes specifications.
+Few Controllers:
+Replication Controller
+Deployment Controller
+Node Controller
+Namespace Controller
+Ingress Controller
+............................
+Worker Nodes:----
+Worker nodes provide isolation between different applications and workloads, ensuring that one workload does not interfere with another.
+Components of the Worker Node:
+	1. kubelet: It runs on each node, ensuring that the containers described in PodSpecs are running as expected.
+		The kubelet constantly checks the health and status of pods and containers running on the node.
+	2. Container Runtime Engine:
+		It is a crucial component responsible for running and managing the containers.
+		This separation enables Kubernetes to support multiple container runtimes while maintaining a consistent interface.
+	3. kube-proxy:
+		It is a critical component of Kubernetes that manages network communication within a cluster.
+		When a Service is created, kube-proxy sets up the necessary routing rules.
