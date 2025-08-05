@@ -1,0 +1,173 @@
+https://github.com/iam-veeramalla/Jenkins-Zero-To-Hero.git
+
+
+sudo apt update
+sudo apt install openjdk-17-jre
+
+curl -fsSL https://pkg.jenkins.io/debian/jenkins.io-2023.key | sudo tee \
+  /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
+  https://pkg.jenkins.io/debian binary/ | sudo tee \
+  /etc/apt/sources.list.d/jenkins.list > /dev/null
+sudo apt-get update
+sudo apt-get install jenkins
+
+enable 8080 in security grp of ec2 instance
+
+now access it through public ec2 ip:8080
+
+sudo cat /var/lib/jenkins/secrets/initialAdminPassword   -> it will gives the initial password just paste it in Jenkins login password and get start with plugin
+
+
+install docker:
+ 	sudo apt install docker.io -y
+
+gave permission:
+	sudo su - 
+	usermod -aG docker jenkins
+	usermod -aG docker ubuntu
+	systemctl restart docker
+
+switch user as :  su - Jenkins
+
+now restart your jenkin on web as :
+	IP:8080/restart
+
+
+Install the Docker Pipeline plugin in Jenkins:
+	Log in to Jenkins.
+	Go to Manage Jenkins > Manage Plugins.
+	In the Available tab, search for "Docker Pipeline".
+	Select the plugin and click the Install button.
+	Restart Jenkins after the plugin is installed.
+
+
+
+
+
+webhooks : is used to trigger the Jenkins or pipeline,webhooks is in GitHub
+
+Jenkins are made up of java thats why it is used to install java first to use it.
+
+
+
+
+
+to make a agent
+**click on manage in Jenkins
+**click on agent
+ **make a new ec2 instance and also install java on it.
+-> go to master jenkin
+-> generate ssh key pair to connect with it. 
+ 	cd ~/ .ssh
+	ls
+	ssh-keygen     // "now provide name to it or just 	left it "
+	ls //private and public key are generated
+	cat public key 
+copy the key after cat 
+go to client in server 
+go to ~/.ssh -> vi authorized->paste the public key
+
+in jenkin client , connect it with ssh and private key 
+don't miss ubuntu as username 
+paste the private key in credential
+
+
+
+create a pipeline: 
+pipeline {
+    agent { label 'client'} //label should be matched with client label
+
+    stages {
+        stage('Hello') {
+            steps {
+                sh "mkdir devops"
+            }
+        }
+    }
+}
+
+
+
+
+**************************
+
+after making  of worker 
+now create a pipeline with git
+paste git link
+check the git button in build
+
+make a script
+pipeline{
+    agent {label "key-work"}
+    
+    stages{
+        stage("code"){
+            steps{
+                echo "this is cloning the code"
+                git url: "https://github.com/LondheShubham153/django-notes-app.git", branch:"main"
+            echo "code cloned"
+            }
+        }
+        
+        stage("build"){
+             steps{
+                echo "this is building the code"
+        
+            }
+            
+        }
+        stage("test"){
+             steps{
+                echo "this is testing"
+            }
+           
+        }
+        stage("deploy"){
+             steps{
+                echo "this id deploying the code"
+            }
+            
+        }
+    }
+}
+
+after that install docker on worker instance
+provide permission sudo usermod -aG docker $USER && newgrp docker
+
+pipeline{
+    agent {label "key-work"}
+    
+    stages{
+        stage("code"){
+            steps{
+                echo "this is cloning the code"
+                git url: "https://github.com/LondheShubham153/django-notes-app.git", branch:"main"
+            echo "code cloned"
+            }
+        }
+        
+        stage("build"){
+             steps{
+                echo "this is building the code"
+                sh "docker build -t notes-app:latest ."
+            }
+            
+        }
+        stage("test"){
+             steps{
+                echo "this is testing"
+            }
+           
+        }
+        stage("deploy"){
+             steps{
+                echo "this id deploying the code"
+            }
+            
+        }
+    }
+}
+
+
+
