@@ -1,0 +1,53 @@
+-> first make a ec2 instance with providing the inbound permission of port number 22,3000,9090,443
+-> connect it with ssh with pem key
+->  prerequesties:
+		->docker
+  		->kind cluster with two worker node and one master
+    		->install kubectl
+		->install helm (curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash)
+
+
+setup promethus:--------------
++++++++++++++++++
+- Add a promethus repo to your local helm 
+	# helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+- add the official Helm stable charts repository to your local Helm 
+	# helm repo add stable https://charts.helm.sh/stable
+- update the local cache of Helm chart repositories
+	# helm repo update
+- create a namespace
+	# kubectl create namespace monitoring
+- install promethus and grafana using stack and enable services type with port
+	# helm install kind-prometheus prometheus-community/kube-prometheus-stack --namespace monitoring --set prometheus.service.nodePort=30000 --set prometheus.service.type=NodePort --set grafana.service.nodePort=31000 --set grafana.service.type=NodePort --set alertmanager.service.nodePort=32000 --set alertmanager.service.type=NodePort --set prometheus-node-exporter.service.nodePort=32001 --set prometheus-node-exporter.service.type=NodePort
+- Check all services in monitoring namespace
+	# kubectl get svc -n monitoring
+- Check all pods in monitoring namespace
+	# kubectl get pod -n monitoring
+
+
+Optional & Testing Purpose
+++++++++++++++++++++++++++++++
+- Port-forwarding for promethus
+	# kubectl port-forward svc/kind-promethus......   -n monitoring 9090:9090 --address=0.0.0.0 & 
+
+- Enable port 9090 in security group
+- Browse public_ip:9090
+- Status > target check 
+- To see the cpu useges and detect its rate 
+	sum (rate (container_cpu_usage_seconds_total{namespace="default"}[1m])) / sum (machine_cpu_cores) * 100
+	
+- port forward for grafana
+	- kubectl port-forward svc/< grafana svc name > -n monitoring 3000:80 --address=0.0.0.0 &
+- Enable port on security group
+- access through publicip:3000
+- username> admin , password> prom-operator
+
+- create a user 
+- to give access on grafana > Go to change role 
+- add datasource  as promethus 
+		- connection > datasource 
+- create a dashboard 
+	- add visuazlization > select datasource > selct metris as cpu > namespace 
+- go to browser search grafana dashboard in that search kubernetes choose a dashboard > copy that dashboard id 
+- go to dashboard > new > import > paste id > choose data source as promethus 
+
