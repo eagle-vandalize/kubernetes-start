@@ -1,0 +1,40 @@
+-first make an ec2 instance
+-- install docker 
+  sudo apt update
+  sudo apt install docker.io -y
+
+--Install kubectl:
+
+Download and install kubectl:
+
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+chmod +x kubectl
+sudo mv kubectl /usr/local/bin/
+sudo usermod -aG docker $USER
+newgrp docker
+
+
+--Install Minikube:
+
+Download and install Minikube:
+
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+
+--Step 3: Configure Minikube
+
+minikube start --driver=docker
+
+
+--Verify Installation:
+
+Check Minikube status:
+minikube status
+
+Verify Kubernetes is running:
+kubectl get nodes
+
+minikube start
+minikube addons enable ingress    ///for ingress controller
+kubectl get pods -n kube-system   //to check running
+
