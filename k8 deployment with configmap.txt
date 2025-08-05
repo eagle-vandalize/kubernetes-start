@@ -1,0 +1,72 @@
+ec2 of medium size 
+install docker
+
+install kind
+config kind master and slave
+set kubectl 
+
+Create the ConfigMap YAML File: Create a file named configmap.yml to define the environment variables you want in the ConfigMap.yaml
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  NGINX_PORT: "80"
+  NGINX_ENV: "production"
+
+Create the Deployment YAML File: Create a file named deployment.yml for the Nginx deployment. This deployment will use the environment variables from the ConfigMap.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        ports:
+        - containerPort: 80
+        envFrom:
+        - configMapRef:
+            name: nginx-config
+
+kubectl apply -f configmap.yml
+
+kubectl apply -f deployment.yml
+
+
+run a service : 
+Create a Service to Expose Nginx: Create a service to expose Nginx. You can use a LoadBalancer type service in Kind (though in Kind, the LoadBalancer won't assign an external IP; you can use kubectl port-forward instead).
+
+Create a service.yml file:
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  selector:
+    app: nginx
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer
+Apply the Service:
+
+
+kubectl apply -f service.yml
+
+kubectl port-forward svc/nginx-service 8080:80 --address=0.0.0.0 &
+
