@@ -1,0 +1,45 @@
+1 first make a instance and connect it with ssh 
+ssh -i /path/to/key osname@ipaddresss
+
+  2  sudo apt update   //to update the os
+
+    3  sudo apt install docker.io -y  //to install docker
+
+    4  history   //to show the command used
+
+    5  sudo systemctl status docker // to check whether the docker is running or not
+
+6   sudo usermod -aG docker ubuntu  //After running this command, the ubuntu user will have permissions to execute Docker commands (docker run, docker ps, etc.) without needing to use sudo every time.
+
+
+
+ 9  logout // logout and reconnect through ssh
+
+   10  docker run hello //now you have access
+
+ 11  git clone https://github.com/eagle-vandalize/learn-dev.git  //to connect with repo on locally
+
+12 docker build -t eaglevandalize/my-first-docker-image:latest . //eaglevandalize is the name of my dockerhub account
+
+13  docker run -it eagle-vandalize/my-first-docker-image:latest //intermediate terminal (-it)
+
+14 docker login  // now provide dockerhub username and password to login
+
+15 after login now push -
+        docker push eaglevandalize/my-first-docker-image:latest
+
+16 docker images //used to check the images
+
+17 docker build -t eaglevandalize/myimage2:latest -f docker-file2 .
+Explanation:
+docker build: This command initiates the build process to create a Docker image.
+
+-t eaglevandalize/myimage2:latest:
+
+The -t flag assigns a name (tag) to the image.
+eaglevandalize/myimage2 is the repository and image name, with :latest indicating the tag (you could replace latest with a version number or custom tag if desired).
+-f docker-file2:
+
+The -f flag allows you to specify a custom Dockerfile name.
+docker-file2 is the custom Dockerfile name here (instead of the default Dockerfile).
+.: Specifies the build context, which is the directory containing the Dockerfile and other files needed for the build. The . means the current directory.
