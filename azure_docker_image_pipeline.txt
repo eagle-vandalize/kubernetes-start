@@ -1,0 +1,83 @@
+Step 1: Set Up EC2 Instance on AWS
+
+connect it with ssh key
+install docker on it
+
+Step 2: Configure Azure DevOps
+-+Go to the Azure DevOps portal and create a new project if you haven’t already.
+Add SSH Key to Azure DevOps:
+
+Navigate to Project Settings > Service connections > New service connection.
+Select SSH and provide:
+Host: Public IP of your EC2 instance.
+SSH Username: ec2-user (or ubuntu for Ubuntu instances).
+Private Key: Use the private key that corresponds to the key pair you created for EC2. Add the private key here.
+
+->>> go to pipeline -library - add pem key there and provide access to project name : xyz
+ 
+Add SSH Key to Azure DevOps:
+
+Step 3: Create Azure DevOps Pipeline
+Create a New Pipeline:
+
+	Go to Pipelines in Azure DevOps.
+	Click New Pipeline > Choose your repository (GitHub, Azure Repos, etc.).
+	Select YAML for pipeline creation.
+
+**********************************
+trigger:
+- main  # Change to your desired branch
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  sshHost: '51.20.191.67'      # EC2 instance IP address
+  sshUser: 'ubuntu'            # EC2 SSH username
+  privateKeyFile: 'aws-first.pem'  # Name of your private key file in Secure Files
+
+steps:
+# Step 1: Checkout code
+- checkout: self
+
+# Step 2: Install SSH client (if not already installed)
+- script: |
+    sudo apt-get update
+    sudo apt-get install -y openssh-client
+  displayName: 'Install SSH Client'
+
+# Step 3: Download the SSH private key from Secure Files
+- task: DownloadSecureFile@1
+  inputs:
+    secureFile: '$(privateKeyFile)'  # Name of your private key file in Secure Files
+  displayName: 'Download SSH Private Key'
+
+# Step 4: Set permissions and configure SSH key for the agent
+- script: |
+    # Ensure the private key file has the correct permissions
+    chmod 600 $(Agent.TempDirectory)/$(privateKeyFile)
+  displayName: 'Set SSH Key Permissions'
+
+# Step 5: Pull NGINX Docker image (or Build if you have a custom image)
+- script: |
+    docker pull nginx:latest
+  displayName: 'Pull NGINX Docker Image'
+
+# Step 6: SSH into EC2 and Run the Docker Container
+- script: |
+    # Ensure the private key is used for SSH connection
+    ssh -o StrictHostKeyChecking=no -i $(Agent.TempDirectory)/$(privateKeyFile) -T $(sshUser)@$(sshHost) <<EOF
+    # Pull the NGINX Docker image (if not already pulled)
+    docker pull nginx:latest
+
+    # Stop any running container on port 80
+    docker stop nginx-container || true
+    docker rm nginx-container || true
+
+    # Run the NGINX container
+    docker run -d --name nginx-container -p 80:80 nginx:latest
+    EOF
+  displayName: 'Deploy NGINX Docker Container to EC2'
+
+
+*******************************************************************
